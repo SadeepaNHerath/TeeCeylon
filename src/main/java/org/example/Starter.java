@@ -5,7 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import java.util.Objects;
+
 
 public class Starter extends Application {
     public static void main(String[] args) {
@@ -13,8 +13,8 @@ public class Starter extends Application {
     }
     @Override
     public void start(Stage primaryStage) throws Exception {
-        primaryStage.setScene(new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("view/loginForm.fxml")))));
-        primaryStage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("img/logo.png"))));
+        primaryStage.setScene(new Scene(FXMLLoader.load(getClass().getResource("/view/loginForm.fxml"))));
+        primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/img/logo.png")));
         primaryStage.setTitle("TeeCeylon");
         primaryStage.setResizable(false);
         primaryStage.show();
