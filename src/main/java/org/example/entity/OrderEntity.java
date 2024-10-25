@@ -1,12 +1,11 @@
 package org.example.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -19,6 +18,9 @@ import java.time.LocalTime;
 @Table(name = "orders")
 public class OrderEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ord_seq")
+    @GenericGenerator(name = "ord_seq", strategy = "org.example.id_generator.OrderIdGenerator"
+    )
     private String ordId;
 
     private String cusName;

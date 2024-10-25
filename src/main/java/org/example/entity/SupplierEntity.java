@@ -1,12 +1,13 @@
 package org.example.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.GenericGenerator;
+
+import java.util.List;
 
 @Data
 @ToString
@@ -15,11 +16,16 @@ import lombok.ToString;
 @Entity
 @Table(name = "suppliers")
 public class SupplierEntity {
-    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sup_seq")
+    @GenericGenerator(name = "sup_seq", strategy = "org.example.id_generators.SupplierIdGenerator"
+    )
     private String supId;
 
     private String supName;
     private String supAddress;
     private String supEmail;
     private String supContact;
+
+    @OneToMany(mappedBy = "supplier")
+    private List<ProductEntity> products;
 }
