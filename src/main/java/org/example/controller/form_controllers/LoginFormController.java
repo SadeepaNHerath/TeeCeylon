@@ -1,6 +1,7 @@
 package org.example.controller.form_controllers;
 
 import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXPasswordField;
 import com.jfoenix.controls.JFXTextField;
 import javafx.event.ActionEvent;
@@ -15,6 +16,7 @@ import java.io.IOException;
 
 public class LoginFormController {
 
+    public JFXComboBox roleCmbBx;
     @FXML
     private JFXTextField emailFld;
 

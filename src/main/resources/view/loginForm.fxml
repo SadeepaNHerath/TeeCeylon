@@ -1,65 +1,69 @@
-<?xml version="1.0" encoding="UTF-8"?> <?import com.jfoenix.controls.JFXButton?> <?import com.jfoenix.controls.JFXPasswordField?> <?import com.jfoenix.controls.JFXTextField?> <?import java.lang.String?> <?import javafx.scene.Cursor?> <?import javafx.scene.image.Image?> <?import javafx.scene.image.ImageView?> <?import javafx.scene.layout.AnchorPane?> <?import javafx.scene.layout.VBox?> <?import javafx.scene.text.Font?> <?import javafx.scene.text.Text?>
-<AnchorPane prefHeight="500.0" prefWidth="909.0" style="-fx-background-color: #2a2a2a;"
-            xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="org.example.controller.form_controllers.LoginFormController">
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXComboBox?>
+<?import com.jfoenix.controls.JFXPasswordField?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import java.lang.String?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane prefHeight="500.0" prefWidth="909.0" style="-fx-background-color: #2a2a2a;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controller.form_controllers.LoginFormController">
     <ImageView fitHeight="500.0" fitWidth="909.0" opacity="0.75" pickOnBounds="true">
         <image>
-            <Image url="@../img/background.jpg"/>
+            <Image url="@../img/background.jpg" />
         </image>
     </ImageView>
-    <ImageView fitHeight="53.0" fitWidth="330.0" layoutX="526.0" layoutY="14.0" pickOnBounds="true"
-               preserveRatio="true">
+    <ImageView fitHeight="53.0" fitWidth="330.0" layoutX="526.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true">
         <image>
-            <Image url="@../img/header-removebg-preview.png"/>
+            <Image url="@../img/header-removebg-preview.png" />
         </image>
     </ImageView>
-    <VBox alignment="CENTER" layoutX="43.0" layoutY="49.0" prefHeight="403.0" prefWidth="443.0" spacing="20.0"
-          style="-fx-background-color: rgba(255,255,255,0.9); -fx-border-radius: 10; -fx-background-radius: 10;"
-          AnchorPane.bottomAnchor="48.0" AnchorPane.leftAnchor="43.0" AnchorPane.rightAnchor="423.0"
-          AnchorPane.topAnchor="49.0">
+    <VBox alignment="CENTER" layoutX="43.0" layoutY="49.0" prefHeight="403.0" prefWidth="443.0" spacing="20.0" style="-fx-background-color: rgba(255,255,255,0.9); -fx-border-radius: 10; -fx-background-radius: 10;" AnchorPane.bottomAnchor="48.0" AnchorPane.leftAnchor="43.0" AnchorPane.rightAnchor="423.0" AnchorPane.topAnchor="49.0">
         <Text style="-fx-font-weight: bold;" text="Login">
             <font>
-                <Font name="Arial" size="30.0"/>
+                <Font name="Arial" size="30.0" />
             </font>
         </Text>
+      <JFXComboBox fx:id="roleCmbBx" prefHeight="27.0" prefWidth="283.0" promptText="Select Role" />
 
         <JFXTextField fx:id="emailFld" labelFloat="true" maxWidth="280.0" promptText="Email">
             <style>
-                <String fx:value="-jfx-focus-color: #4CAF50; -jfx-unfocus-color: #ccc;"/>
+                <String fx:value="-jfx-focus-color: #4CAF50; -jfx-unfocus-color: #ccc;" />
             </style>
         </JFXTextField>
 
         <JFXPasswordField fx:id="passwordFld" labelFloat="true" maxWidth="280.0" promptText="Password">
             <style>
-                <String fx:value="-jfx-focus-color: #FF5722; -jfx-unfocus-color: #ccc;"/>
+                <String fx:value="-jfx-focus-color: #FF5722; -jfx-unfocus-color: #ccc;" />
             </style>
         </JFXPasswordField>
 
-        <Text fx:id="forgotPasswordTxt" accessibleRole="HYPERLINK" onMouseClicked="#forgotPasswordOnClick"
-              strokeLineJoin="ROUND" strokeType="OUTSIDE" style="-fx-fill: #1976D2; -fx-underline: true;"
-              text="Forgot your password?">
+        <Text fx:id="forgotPasswordTxt" accessibleRole="HYPERLINK" onMouseClicked="#forgotPasswordOnClick" strokeLineJoin="ROUND" strokeType="OUTSIDE" style="-fx-fill: #1976D2; -fx-underline: true;" text="Forgot your password?">
             <font>
-                <Font size="12.0"/>
+                <Font size="12.0" />
             </font>
             <cursor>
-                <Cursor fx:constant="HAND"/>
+                <Cursor fx:constant="HAND" />
             </cursor>
         </Text>
 
-        <JFXButton fx:id="loginBtn" buttonType="RAISED" maxWidth="280.0" onAction="#loginBtnOnaction"
-                   style="-fx-background-color: #2196F3; -fx-text-fill: white;" text="Login">
+        <JFXButton fx:id="loginBtn" buttonType="RAISED" maxWidth="280.0" onAction="#loginBtnOnaction" style="-fx-background-color: #2196F3; -fx-text-fill: white;" text="Login">
             <font>
-                <Font size="16.0"/>
+                <Font size="16.0" />
             </font>
         </JFXButton>
-        <Text fx:id="signUptxt" accessibleRole="HYPERLINK" layoutX="171.0" layoutY="261.0"
-              onMouseClicked="#registerOnClick" strokeType="OUTSIDE" style="-fx-fill: #1976D2; -fx-underline: true;"
-              text="Haven't registered yet? Sign Up">
+        <Text fx:id="signUptxt" accessibleRole="HYPERLINK" layoutX="171.0" layoutY="261.0" onMouseClicked="#registerOnClick" strokeType="OUTSIDE" style="-fx-fill: #1976D2; -fx-underline: true;" text="Haven't registered yet? Sign Up">
             <font>
-                <Font size="12.0"/>
+                <Font size="12.0" />
             </font>
             <cursor>
-                <Cursor fx:constant="HAND"/>
+                <Cursor fx:constant="HAND" />
             </cursor>
         </Text>
     </VBox>

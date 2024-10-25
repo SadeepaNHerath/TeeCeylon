@@ -15,7 +15,7 @@ import java.time.LocalTime;
 public class Order {
     private String ordId;
     private String cusName;
-    private String cusContact;
+    private String cusEmail;
     private LocalDate ordDate;
     private LocalTime ordTime;
     private Double ordTotal;
