@@ -4,35 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f17c08e6-e98f-4150-a970-3b0f37386710" name="Changes" comment="Structure create + login ui">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/controller/form_controllers/AdminEmployeeFormController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/controller/form_controllers/AdminInventoryFormController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/controller/form_controllers/AdminOrderDetailsFormController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/controller/form_controllers/AdminOrdersFormController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/controller/form_controllers/AdminReportsFormController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/controller/form_controllers/AdminSuppliersFormController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/controller/form_controllers/CashierInventoryFormController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/controller/form_controllers/CashierOrderDetailsFormController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/controller/form_controllers/CashierOrdersFormController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/controller/form_controllers/CashierPlaceOrderFormController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/controller/form_controllers/CashierReportsFormController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/view/adminEmployeeForm.fxml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/view/adminInventoryForm.fxml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/view/adminOrderDetailsForm.fxml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/view/adminOrdersForm.fxml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/view/adminReportsForm.fxml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/view/adminSupplierForm.fxml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/view/casheirPlaceOrder.fxml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/view/cashierInventoryForm.fxml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/view/cashierOrderDetailsForm.fxml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/view/cashierOrdersForm.fxml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/view/cashierReportsForm.fxml" afterDir="false" />
+    <list default="true" id="f17c08e6-e98f-4150-a970-3b0f37386710" name="Changes" comment="ui Designs">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/controller/form_controllers/AdminInventoryFormController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/controller/form_controllers/AdminInventoryFormController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/controller/form_controllers/LoginFormController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/controller/form_controllers/LoginFormController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/entity/OrderEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/entity/OrderEntity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/model/Order.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/model/Order.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/view/loginForm.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/view/loginForm.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/view/registerForm.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/view/registerForm.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/view/casheirPlaceOrder.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/view/cashierPlaceOrderForm.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -111,12 +87,21 @@
       <option name="project" value="LOCAL" />
       <updated>1729613690329</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="ui Designs">
+      <option name="closed" value="true" />
+      <created>1729872515394</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1729872515394</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Initial" />
     <MESSAGE value="Structure create + login ui" />
-    <option name="LAST_COMMIT_MESSAGE" value="Structure create + login ui" />
+    <MESSAGE value="ui Designs" />
+    <option name="LAST_COMMIT_MESSAGE" value="ui Designs" />
   </component>
 </project>

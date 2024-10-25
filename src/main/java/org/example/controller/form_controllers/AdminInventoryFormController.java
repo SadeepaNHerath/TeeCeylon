@@ -106,7 +106,7 @@ public class AdminInventoryFormController {
     private JFXButton updateBtn;
 
     @FXML
-    void addButtonOnAction(ActionEvent event) {
+    void addBtnOnAction(ActionEvent event) {
 
     }
     @FXML
