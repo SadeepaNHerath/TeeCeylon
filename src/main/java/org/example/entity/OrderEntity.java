@@ -9,6 +9,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Data
 @ToString
@@ -28,4 +29,7 @@ public class OrderEntity {
     private LocalDate ordDate;
     private LocalTime ordTime;
     private Double ordTotal;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<OrderDetailsEntity> orderDetails;
 }

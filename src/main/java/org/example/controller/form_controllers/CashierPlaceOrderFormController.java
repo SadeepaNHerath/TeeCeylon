@@ -3,26 +3,43 @@ package org.example.controller.form_controllers;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXTextField;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import org.example.entity.OrderDetailsEntity;
+import org.example.entity.OrderEntity;
+import org.example.entity.ProductEntity;
+import org.example.model.Order;
+import org.example.model.OrderDetails;
+import org.example.model.Product;
+import org.example.service.ServiceFactory;
+import org.example.service.custom.OrderService;
+import org.example.service.custom.ProductService;
+import org.example.util.ServiceType;
 
 import java.io.IOException;
+import java.net.URL;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
 
-public class CashierPlaceOrderFormController {
+public class CashierPlaceOrderFormController implements Initializable {
 
     @FXML
     private JFXButton addToCartBtn;
 
     @FXML
-    private TableView<?> cartTbl;
+    private TableView<OrderDetailsEntity> cartTbl;
 
     @FXML
     private JFXTextField cusEmailTxt;
@@ -52,25 +69,25 @@ public class CashierPlaceOrderFormController {
     private JFXButton placeOrderBtn;
 
     @FXML
-    private JFXComboBox<?> productIdCmbBx;
+    private JFXComboBox<String> productIdCmbBx;
 
     @FXML
-    private TableColumn<?, ?> productIdCol;
+    private TableColumn<OrderDetailsEntity, String> productIdCol;
 
     @FXML
     private JFXTextField productNameTxt;
 
     @FXML
-    private TableColumn<?, ?> qtyCol;
+    private TableColumn<OrderDetailsEntity, Integer> qtyCol;
 
     @FXML
-    private Spinner<?> quantitySpnr;
+    private Spinner<Integer> quantitySpnr;
 
     @FXML
     private JFXButton reportsBtn;
 
     @FXML
-    private TableColumn<?, ?> totalCol;
+    private TableColumn<OrderDetailsEntity, Double> totalCol;
 
     @FXML
     private Label totalTxt;
@@ -82,16 +99,40 @@ public class CashierPlaceOrderFormController {
     private Label txtUnitPrice;
 
     @FXML
-    private TableColumn<?, ?> unitPriceCol;
+    private TableColumn<OrderDetailsEntity, Double> unitPriceCol;
+
+    private ObservableList<OrderDetailsEntity> cartItems = FXCollections.observableArrayList();
+    private OrderService orderService = ServiceFactory.getInstance().getService(ServiceType.ORDER);
+    private ProductService productService = ServiceFactory.getInstance().getService(ServiceType.PRODUCT);
 
     @FXML
-    void OrderBtnOnAction(ActionEvent event) {
+    private void OrderBtnOnAction(ActionEvent actionEvent) {
+        String customerName = cusNameTxt.getText();
+        String customerEmail = cusEmailTxt.getText();
+        LocalDate orderDate = LocalDate.now();
+        LocalTime orderTime = LocalTime.now();
+        double orderTotal = Double.parseDouble(totalTxt.getText());
 
-    }
+        Order order = new Order();
+        order.setOrdId(orderIdTxt.getText());
+        order.setCusName(customerName);
+        order.setCusEmail(customerEmail);
+        order.setOrdDate(orderDate);
+        order.setOrdTime(orderTime);
+        order.setOrdTotal(orderTotal);
 
-    @FXML
-    void addToCartBtnOnAction(ActionEvent event) {
+        ObservableList<OrderDetails> orderDetailsList = FXCollections.observableArrayList();
+        for (OrderDetailsEntity entity : cartItems) {
+            OrderDetails details = new OrderDetails();
+            details.setOrdId(entity.getOrdId());
+            details.setProId(entity.getProId());
+            details.setProQty(entity.getProQty());
+            details.setProTotal(entity.getProTotal());
+            orderDetailsList.add(details);
+        }
 
+        orderService.addOrder(order, orderDetailsList);
+        clearForm();
     }
 
     @FXML
@@ -146,6 +187,61 @@ public class CashierPlaceOrderFormController {
             stage.show();
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+       qtyCol.setCellValueFactory(new PropertyValueFactory<>("proQty"));
+        unitPriceCol.setCellValueFactory(new PropertyValueFactory<>("proTotal"));
+       totalCol.setCellValueFactory(new PropertyValueFactory<>("proTotal"));
+       //loadProducts();
+       quantitySpnr.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 1));
+    }
+
+    private void loadProducts() {
+        List<ProductEntity> products = productService.getAllProducts();
+        for (ProductEntity product : products) {
+            productIdCmbBx.getItems().add(product.getProId());
+        }
+    }
+
+    private void updateTotal() {
+        double total = cartItems.stream().mapToDouble(OrderDetailsEntity::getProTotal).sum();
+        totalTxt.setText(String.format("%.2f", total));
+    }
+
+    private void clearForm() {
+        cusNameTxt.clear();
+        cusEmailTxt.clear();
+        productIdCmbBx.getSelectionModel().clearSelection();
+        productNameTxt.clear();
+        txtUnitPrice.setText("0");
+        txtSize.setText("0");
+        quantitySpnr.getValueFactory().setValue(0);
+        cartItems.clear();
+        cartTbl.setItems(cartItems);
+        totalTxt.setText("0");
+
+    }
+
+    @FXML
+    private void addToCartBtnOnAction(ActionEvent actionEvent) {
+        String selectedProductId = productIdCmbBx.getValue();
+        if (selectedProductId != null) {
+            Product product = productService.searchProductById(selectedProductId);
+            int quantity = quantitySpnr.getValue();
+            double total = product.getProPrice() * quantity;
+
+            OrderDetailsEntity orderDetails = new OrderDetailsEntity();
+            orderDetails.setOrdId(orderIdTxt.getText());
+            orderDetails.setProId(product.getProId());
+            orderDetails.setProQty(quantity);
+            orderDetails.setProTotal(total);
+
+            cartItems.add(orderDetails);
+            cartTbl.setItems(cartItems);
+            updateTotal();
         }
     }
 

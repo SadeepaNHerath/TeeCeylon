@@ -16,8 +16,7 @@ import org.hibernate.annotations.GenericGenerator;
 public class EmployeeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "emp_seq")
-    @GenericGenerator( name = "emp_seq", strategy = "org.example.id_generators.EmployeeIdGenerator"
-    )
+    @GenericGenerator(name = "emp_seq", strategy = "org.example.id_generators.EmployeeIdGenerator")
     private String empId;
 
     private String empRole;

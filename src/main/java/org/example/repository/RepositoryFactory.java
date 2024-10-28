@@ -4,10 +4,6 @@ import org.example.repository.custom.impl.EmployeeRepositoryImpl;
 import org.example.repository.custom.impl.OrderRepositoryImpl;
 import org.example.repository.custom.impl.ProductRepositoryImpl;
 import org.example.repository.custom.impl.SupplierRepositoryImpl;
-import org.example.service.custom.impl.EmployeeServiceImpl;
-import org.example.service.custom.impl.OrderServiceImpl;
-import org.example.service.custom.impl.ProductServiceImpl;
-import org.example.service.custom.impl.SupplierServiceImpl;
 import org.example.util.RepositoryType;
 
 public class RepositoryFactory {

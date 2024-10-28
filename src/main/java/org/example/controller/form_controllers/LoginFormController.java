@@ -16,6 +16,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 
 public class LoginFormController implements Initializable {
 
@@ -36,6 +37,9 @@ public class LoginFormController implements Initializable {
     @FXML
     private Text signUptxt;
 
+    private static final Logger logger = Logger.getLogger(LoginFormController.class.getName());
+
+
     @FXML
     void forgotPasswordOnClick(MouseEvent event) {
         Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
@@ -49,32 +53,38 @@ public class LoginFormController implements Initializable {
 
     @FXML
     void loginBtnOnaction(ActionEvent event) {
-        if (roleCmbBx.getValue().equals("Admin")) {
-            String email = emailFld.getText();
-            String password = passwordFld.getText();
-            if (email.equals("admin@gmail.com") && password.equals("admin")) {
-                Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
-                try {
-                    stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("/view/adminReportsForm.fxml"))));
-                    stage.show();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+        try {
+            if (roleCmbBx.getValue().equals("Admin")) {
+                String email = emailFld.getText();
+                String password = passwordFld.getText();
+                if (email.equals("admin@gmail.com") && password.equals("admin")) {
+                    Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+                    URL resource = getClass().getResource("/view/adminReportsForm.fxml");
+                    if (resource != null) {
+                        stage.setScene(new Scene(FXMLLoader.load(resource)));
+                        stage.show();
+                    } else {
+                        logger.warning("Resource not found: /view/adminReportsForm.fxml");
+                    }
+                }
+            } else if (roleCmbBx.getValue().equals("Cashier")) {
+                String email = emailFld.getText();
+                String password = passwordFld.getText();
+                if (email.equals("cashier@gmail.com") && password.equals("cashier")) {
+                    Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+                    URL resource = getClass().getResource("/view/cashierPlaceOrderForm.fxml");
+                    if (resource != null) {
+                        stage.setScene(new Scene(FXMLLoader.load(resource)));
+                        stage.show();
+                    } else {
+                        logger.warning("Resource not found: /view/cashierPlaceOrderForm.fxml");
+                    }
+                } else {
+                    logger.info("Invalid email or password");
                 }
             }
-        }else if (roleCmbBx.getValue().equals("Cashier")) {
-            String email = emailFld.getText();
-            String password = passwordFld.getText();
-            if (email.equals("cashier@gmail.com") && password.equals("cashier")) {
-                Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
-                try {
-                    stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("/view/cashierPlaceOrderForm.fxml"))));
-                    stage.show();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }else {
-                System.out.println("Invalid email or password");
-            }
+        } catch (IOException e) {
+            logger.severe(STR."Failed to load the scene: \{e.getMessage()}");
         }
     }
 
