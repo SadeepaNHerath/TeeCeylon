@@ -89,16 +89,15 @@ public class EmployeeController {
 
     public boolean authenticateEmployee(String email, String password, String role) {
         ObservableList<EmployeeEntity> allEmployees = getAllEmployees();
-        Encryptor encryptor = new Encryptor();
         try {
-            for (EmployeeEntity employee:allEmployees){
-                if (employee.getEmail().equals(email) && employee.getPassword().equals(encryptor.encryptString(password)) && employee.getEmpRole().equalsIgnoreCase(role)){
-                    currentEmployee=new ModelMapper().map(employee,Employee.class);
+            for (EmployeeEntity employee : allEmployees) {
+                if (employee.getEmail().equals(email) && Encryptor.verify(password, employee.getPassword()) && employee.getEmpRole().equalsIgnoreCase(role)) {
+                    currentEmployee = new ModelMapper().map(employee, Employee.class);
                     return true;
                 }
             }
             return false;
-        } catch (NoSuchAlgorithmException e) {
+        } catch (Exception e) {
             return false;
         }
     }
