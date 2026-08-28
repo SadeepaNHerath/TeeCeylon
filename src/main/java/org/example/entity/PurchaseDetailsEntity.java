@@ -7,30 +7,30 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Data
-@ToString(exclude = {"order", "product"})
+@ToString(exclude = {"purchase", "product"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "order_details")
-@IdClass(OrderDetailsId.class)
-public class OrderDetailsEntity {
+@Table(name = "purchase_details")
+@IdClass(PurchaseDetailsId.class)
+public class PurchaseDetailsEntity {
     @Id
-    @Column(name = "ord_id")
-    private String ordId;
+    @Column(name = "purchase_id")
+    private String purchaseId;
 
     @Id
     @Column(name = "pro_id")
     private String proId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ord_id", insertable = false, updatable = false)
-    private OrderEntity order;
+    @JoinColumn(name = "purchase_id", insertable = false, updatable = false)
+    private PurchaseEntity purchase;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "pro_id", insertable = false, updatable = false)
     private ProductEntity product;
 
-    private Integer proQty;
-    private Double unitPrice;
-    private Double proTotal;
+    private Integer qty;
+    private Double unitCost;
+    private Double totalCost;
 }

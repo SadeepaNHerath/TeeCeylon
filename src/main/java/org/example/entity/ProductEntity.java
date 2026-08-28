@@ -10,7 +10,7 @@ import org.hibernate.annotations.GenericGenerator;
 import java.util.List;
 
 @Data
-@ToString
+@ToString(exclude = {"orderDetails", "supplier"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -18,23 +18,27 @@ import java.util.List;
 public class ProductEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "pro_seq")
-    @GenericGenerator(name = "pro_seq", strategy = "org.example.id_generators.ProductIdGenerator"
-    )
+    @GenericGenerator(name = "pro_seq", strategy = "org.example.id_generators.ProductIdGenerator")
     private String proId;
 
-    private String proName;
-    private String proCategory;
+    @Column(unique = true)
+    private String sku;
 
-    @ManyToOne
-    @JoinColumn(name = "supId")
+    private String proName;
+    private String proCategory; // Gents, Ladies, Kids
+    private String proStyle;    // Crew Neck, V-Neck, Polo, Oversized, Tank Top
+    private String proSize;     // XS, S, M, L, XL, XXL, XXXL
+    private String proColor;    // Black, White, Navy Blue, Maroon, etc.
+
+    private Double costPrice;   // Cost price
+    private Double proPrice;    // Selling price
+    private Integer stockQty;   // Current in-stock quantity
+    private Integer reorderLevel; // Alert threshold (e.g., 10)
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "sup_id")
     private SupplierEntity supplier;
 
-    private String supId;
-    private String proSize;
-    private Double proPrice;
-    private Integer stockQty;
-
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private List<OrderDetailsEntity> orderDetails;
-
 }

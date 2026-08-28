@@ -8,7 +8,9 @@ import org.example.service.SuperService;
 public interface EmployeeService extends SuperService {
     boolean addEmployee(Employee employee);
     Employee searchEmployee(String id);
+    Employee searchEmployeeByEmail(String email);
     boolean updateEmployee(Employee employee);
     ObservableList<EmployeeEntity> getAllEmployees();
     boolean deleteEmployee(String id);
+    Employee authenticate(String email, String rawPassword, String expectedRole);
 }

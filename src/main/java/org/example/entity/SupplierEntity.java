@@ -10,15 +10,15 @@ import org.hibernate.annotations.GenericGenerator;
 import java.util.List;
 
 @Data
-@ToString
+@ToString(exclude = "products")
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "suppliers")
 public class SupplierEntity {
+    @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sup_seq")
-    @GenericGenerator(name = "sup_seq", strategy = "org.example.id_generators.SupplierIdGenerator"
-    )
+    @GenericGenerator(name = "sup_seq", strategy = "org.example.id_generators.SupplierIdGenerator")
     private String supId;
 
     private String supName;
@@ -26,6 +26,6 @@ public class SupplierEntity {
     private String supEmail;
     private String supContact;
 
-    @OneToMany(mappedBy = "supplier")
+    @OneToMany(mappedBy = "supplier", fetch = FetchType.LAZY)
     private List<ProductEntity> products;
 }

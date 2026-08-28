@@ -9,13 +9,12 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderDetails {
-    private String ordId;
+public class PurchaseDetails {
+    private String purchaseId;
     private String proId;
     private String proName;
-    private String proSize;
-    private String proColor;
-    private Integer proQty;
-    private Double unitPrice;
-    private Double proTotal;
+    private String sku;
+    private Integer qty;
+    private Double unitCost;
+    private Double totalCost;
 }

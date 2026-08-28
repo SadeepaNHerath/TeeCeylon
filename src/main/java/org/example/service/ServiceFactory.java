@@ -1,9 +1,6 @@
 package org.example.service;
 
-import org.example.service.custom.impl.EmployeeServiceImpl;
-import org.example.service.custom.impl.OrderServiceImpl;
-import org.example.service.custom.impl.ProductServiceImpl;
-import org.example.service.custom.impl.SupplierServiceImpl;
+import org.example.service.custom.impl.*;
 import org.example.util.ServiceType;
 
 public class ServiceFactory {
@@ -22,6 +19,8 @@ public class ServiceFactory {
             case ORDER -> (T) new OrderServiceImpl();
             case PRODUCT -> (T) new ProductServiceImpl();
             case SUPPLIER -> (T) new SupplierServiceImpl();
+            case CUSTOMER -> (T) new CustomerServiceImpl();
+            case PURCHASE -> (T) new PurchaseServiceImpl();
             default -> null;
         };
     }

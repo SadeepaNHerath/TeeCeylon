@@ -19,10 +19,13 @@ public class EmployeeEntity {
     @GenericGenerator(name = "emp_seq", strategy = "org.example.id_generators.EmployeeIdGenerator")
     private String empId;
 
-    private String empRole;
+    private String empRole; // ADMIN, CASHIER
     private String empName;
     private String contactNum;
     private String address;
+
+    @Column(unique = true, nullable = false)
     private String email;
+
     private String password;
 }

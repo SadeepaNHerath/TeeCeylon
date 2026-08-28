@@ -2,22 +2,22 @@ package org.example.repository.custom.impl;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.example.entity.EmployeeEntity;
-import org.example.repository.custom.EmployeeRepository;
+import org.example.entity.CustomerEntity;
+import org.example.repository.custom.CustomerRepository;
 import org.example.util.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import java.util.List;
 
-public class EmployeeRepositoryImpl implements EmployeeRepository {
+public class CustomerRepositoryImpl implements CustomerRepository {
     @Override
-    public boolean save(EmployeeEntity employee) {
+    public boolean save(CustomerEntity customerEntity) {
         Transaction tx = null;
         try (Session session = HibernateUtil.getSession()) {
             if (session == null) return false;
             tx = session.beginTransaction();
-            session.persist(employee);
+            session.persist(customerEntity);
             tx.commit();
             return true;
         } catch (Exception e) {
@@ -27,12 +27,12 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
     }
 
     @Override
-    public boolean update(EmployeeEntity employee) {
+    public boolean update(CustomerEntity customerEntity) {
         Transaction tx = null;
         try (Session session = HibernateUtil.getSession()) {
             if (session == null) return false;
             tx = session.beginTransaction();
-            session.merge(employee);
+            session.merge(customerEntity);
             tx.commit();
             return true;
         } catch (Exception e) {
@@ -47,9 +47,9 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
         try (Session session = HibernateUtil.getSession()) {
             if (session == null) return false;
             tx = session.beginTransaction();
-            EmployeeEntity emp = session.get(EmployeeEntity.class, id);
-            if (emp != null) {
-                session.remove(emp);
+            CustomerEntity customer = session.get(CustomerEntity.class, id);
+            if (customer != null) {
+                session.remove(customer);
                 tx.commit();
                 return true;
             }
@@ -61,21 +61,21 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
     }
 
     @Override
-    public EmployeeEntity searchById(String id) {
+    public CustomerEntity searchById(String id) {
         try (Session session = HibernateUtil.getSession()) {
             if (session == null) return null;
-            return session.get(EmployeeEntity.class, id);
+            return session.get(CustomerEntity.class, id);
         } catch (Exception e) {
             return null;
         }
     }
 
     @Override
-    public EmployeeEntity searchByEmail(String email) {
+    public CustomerEntity searchByPhone(String phone) {
         try (Session session = HibernateUtil.getSession()) {
-            if (session == null || email == null || email.trim().isEmpty()) return null;
-            return session.createQuery("FROM EmployeeEntity WHERE LOWER(email) = :email", EmployeeEntity.class)
-                    .setParameter("email", email.trim().toLowerCase())
+            if (session == null || phone == null || phone.trim().isEmpty()) return null;
+            return session.createQuery("FROM CustomerEntity WHERE phone = :phone", CustomerEntity.class)
+                    .setParameter("phone", phone.trim())
                     .uniqueResult();
         } catch (Exception e) {
             return null;
@@ -83,11 +83,11 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
     }
 
     @Override
-    public ObservableList<EmployeeEntity> getAll() {
-        ObservableList<EmployeeEntity> list = FXCollections.observableArrayList();
+    public ObservableList<CustomerEntity> getAll() {
+        ObservableList<CustomerEntity> list = FXCollections.observableArrayList();
         try (Session session = HibernateUtil.getSession()) {
             if (session == null) return list;
-            List<EmployeeEntity> results = session.createQuery("FROM EmployeeEntity ORDER BY empId ASC", EmployeeEntity.class).list();
+            List<CustomerEntity> results = session.createQuery("FROM CustomerEntity ORDER BY cusId ASC", CustomerEntity.class).list();
             list.addAll(results);
             return list;
         } catch (Exception e) {

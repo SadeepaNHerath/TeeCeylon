@@ -4,4 +4,5 @@ import org.example.entity.EmployeeEntity;
 import org.example.repository.CrudRepository;
 
 public interface EmployeeRepository extends CrudRepository<EmployeeEntity> {
+    EmployeeEntity searchByEmail(String email);
 }

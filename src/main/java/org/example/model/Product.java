@@ -1,9 +1,9 @@
 package org.example.model;
 
-import lombok.Data;
-import lombok.ToString;
-import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @ToString
@@ -11,10 +11,15 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class Product {
     private String proId;
+    private String sku;
     private String proName;
     private String proCategory;
-    private String supId;
+    private String proStyle;
     private String proSize;
+    private String proColor;
+    private Double costPrice;
     private Double proPrice;
     private Integer stockQty;
+    private Integer reorderLevel;
+    private String supId;
 }

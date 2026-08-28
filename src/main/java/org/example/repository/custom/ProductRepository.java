@@ -6,4 +6,6 @@ import org.example.repository.CrudRepository;
 
 public interface ProductRepository extends CrudRepository<ProductEntity> {
     ObservableList<ProductEntity> getAllProductForSupplier(String id);
+    ProductEntity searchBySku(String sku);
+    ObservableList<ProductEntity> getLowStockProducts();
 }

@@ -1,5 +1,5 @@
 package org.example.util;
 
 public enum ServiceType {
-    EMPLOYEE,ORDER,PRODUCT,SUPPLIER
+    EMPLOYEE, ORDER, PRODUCT, SUPPLIER, CUSTOMER, PURCHASE
 }

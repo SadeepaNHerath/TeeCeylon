@@ -1,9 +1,6 @@
 package org.example.repository;
 
-import org.example.repository.custom.impl.EmployeeRepositoryImpl;
-import org.example.repository.custom.impl.OrderRepositoryImpl;
-import org.example.repository.custom.impl.ProductRepositoryImpl;
-import org.example.repository.custom.impl.SupplierRepositoryImpl;
+import org.example.repository.custom.impl.*;
 import org.example.util.RepositoryType;
 
 public class RepositoryFactory {
@@ -19,6 +16,8 @@ public class RepositoryFactory {
             case ORDER -> (T) new OrderRepositoryImpl();
             case PRODUCT -> (T) new ProductRepositoryImpl();
             case SUPPLIER -> (T) new SupplierRepositoryImpl();
+            case CUSTOMER -> (T) new CustomerRepositoryImpl();
+            case PURCHASE -> (T) new PurchaseRepositoryImpl();
             default -> null;
         };
     }

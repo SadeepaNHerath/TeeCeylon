@@ -7,148 +7,176 @@ import org.example.entity.OrderEntity;
 import org.example.entity.ProductEntity;
 import org.example.repository.custom.OrderRepository;
 import org.example.util.HibernateUtil;
-import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class OrderRepositoryImpl implements OrderRepository {
+
     @Override
-    public boolean update(OrderEntity orderEntity, ObservableList<OrderDetailsEntity> orderDetailEntities) {
-        Session session = HibernateUtil.getSession();
-        Transaction transaction = null;
+    public boolean save(OrderEntity orderEntity, ObservableList<OrderDetailsEntity> orderDetailsList) {
+        Transaction tx = null;
+        try (Session session = HibernateUtil.getSession()) {
+            if (session == null) return false;
+            tx = session.beginTransaction();
 
-        try {
-            transaction = session.beginTransaction();
-            OrderEntity existingOrder = session.get(OrderEntity.class, orderEntity.getOrdId());
-            if (existingOrder == null) {
-                return false;
+            if (orderEntity.getOrdDate() == null) {
+                orderEntity.setOrdDate(LocalDate.now());
+            }
+            if (orderEntity.getOrdTime() == null) {
+                orderEntity.setOrdTime(LocalTime.now());
             }
 
-            existingOrder.setCusName(orderEntity.getCusName());
-            existingOrder.setCusEmail(orderEntity.getCusEmail());
-            existingOrder.setOrdTotal(orderEntity.getOrdTotal());
+            session.persist(orderEntity);
 
-            for (OrderDetailsEntity newDetail : orderDetailEntities) {
-                boolean found = false;
-                for (OrderDetailsEntity existingDetail : existingOrder.getOrderDetails()) {
-                    if (existingDetail.getProId().equals(newDetail.getProId())) {
-                        found = true;
-                        int qtyDifference = existingDetail.getProQty() - newDetail.getProQty();
+            for (OrderDetailsEntity detail : orderDetailsList) {
+                detail.setOrdId(orderEntity.getOrdId());
 
-                        existingDetail.setProQty(newDetail.getProQty());
-                        existingDetail.setProTotal(newDetail.getProTotal());
-
-                        ProductEntity product = session.get(ProductEntity.class, newDetail.getProId());
-                        if (product.getStockQty() + qtyDifference >= 0) {
-                            product.setStockQty(product.getStockQty() + qtyDifference);
-                        } else {
-                            throw new RuntimeException("Insufficient stock level for product: ");
-                        }
-
-                        session.merge(product);
-                        session.merge(existingDetail);
-                    }
+                ProductEntity product = session.get(ProductEntity.class, detail.getProId());
+                if (product == null) {
+                    throw new RuntimeException("Product not found: " + detail.getProId());
                 }
-                if (!found) {
-                    existingOrder.getOrderDetails().add(newDetail);
 
-                    ProductEntity product = session.get(ProductEntity.class, newDetail.getProId());
-                    if (product.getStockQty() >= newDetail.getProQty()) {
-                        product.setStockQty(product.getStockQty() - newDetail.getProQty());
-                    } else {
-                        throw new RuntimeException(STR."Insufficient stock level for new product: \{product.getProName()}");
-                    }
+                int reqQty = detail.getProQty() != null ? detail.getProQty() : 1;
+                int currentStock = product.getStockQty() != null ? product.getStockQty() : 0;
 
-                    session.merge(product);
-                    session.persist(newDetail);
+                if (currentStock < reqQty) {
+                    throw new RuntimeException("Insufficient stock for product " + product.getProName() + " (Available: " + currentStock + ", Requested: " + reqQty + ")");
                 }
-            }
-            List<OrderDetailsEntity> detailsToRemove = new ArrayList<>();
-            for (OrderDetailsEntity existingDetail : existingOrder.getOrderDetails()) {
-                boolean isStillPresent = false;
-                for (OrderDetailsEntity newDetail : orderDetailEntities) {
-                    if (newDetail.getProId().equals(existingDetail.getProId())) {
-                        isStillPresent = true;
-                        break;
-                    }
-                }
-                if (!isStillPresent) {
-                    detailsToRemove.add(existingDetail);
-                    ProductEntity product = session.get(ProductEntity.class, existingDetail.getProId());
-                    product.setStockQty(product.getStockQty() + existingDetail.getProQty());
-                    session.merge(product);
-                }
+
+                product.setStockQty(currentStock - reqQty);
+                session.merge(product);
+
+                detail.setProduct(product);
+                session.persist(detail);
             }
 
-            for (OrderDetailsEntity detailToRemove : detailsToRemove) {
-                session.remove(detailToRemove);
-            }
-            existingOrder.getOrderDetails().removeAll(detailsToRemove);
-            session.merge(existingOrder);
-            transaction.commit();
+            tx.commit();
             return true;
         } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
+            if (tx != null) tx.rollback();
             e.printStackTrace();
             return false;
-        } finally {
-            session.close();
         }
     }
 
     @Override
-    public boolean save(OrderEntity orderEntity, ObservableList<OrderDetailsEntity> orderDetailsEntity
-) {
-        Session session = HibernateUtil.getSession();
-        Transaction transaction = null;
-        try {
-            transaction = session.beginTransaction();
+    public boolean update(OrderEntity orderEntity, ObservableList<OrderDetailsEntity> newDetailEntities) {
+        Transaction tx = null;
+        try (Session session = HibernateUtil.getSession()) {
+            if (session == null) return false;
+            tx = session.beginTransaction();
 
-            session.persist(orderEntity);
+            OrderEntity existingOrder = session.get(OrderEntity.class, orderEntity.getOrdId());
+            if (existingOrder == null) return false;
 
-            for (OrderDetailsEntity orderDetail : orderDetailsEntity
-) {
-                session.persist(orderDetail);
+            existingOrder.setCusName(orderEntity.getCusName());
+            existingOrder.setCusPhone(orderEntity.getCusPhone());
+            existingOrder.setCusEmail(orderEntity.getCusEmail());
+            existingOrder.setOrdTotal(orderEntity.getOrdTotal());
 
-                ProductEntity product = session.get(ProductEntity.class, orderDetail.getProId());
-                if (product.getStockQty() > orderDetail.getProQty()) {
-                    product.setStockQty(product.getStockQty() - orderDetail.getProQty());
-                } else {
-                    throw new RuntimeException("Insufficient stock level");
+            // Adjust stock for existing items
+            if (existingOrder.getOrderDetails() != null) {
+                for (OrderDetailsEntity oldDetail : existingOrder.getOrderDetails()) {
+                    ProductEntity product = session.get(ProductEntity.class, oldDetail.getProId());
+                    if (product != null) {
+                        product.setStockQty(product.getStockQty() + oldDetail.getProQty());
+                        session.merge(product);
+                    }
+                    session.remove(oldDetail);
                 }
+                existingOrder.getOrderDetails().clear();
             }
 
-            transaction.commit();
+            // Add new items and decrement stock
+            for (OrderDetailsEntity newDetail : newDetailEntities) {
+                newDetail.setOrdId(existingOrder.getOrdId());
+                ProductEntity product = session.get(ProductEntity.class, newDetail.getProId());
+                if (product == null || product.getStockQty() < newDetail.getProQty()) {
+                    throw new RuntimeException("Insufficient stock level for product: " + (product != null ? product.getProName() : newDetail.getProId()));
+                }
+                product.setStockQty(product.getStockQty() - newDetail.getProQty());
+                session.merge(product);
+
+                newDetail.setProduct(product);
+                session.persist(newDetail);
+            }
+
+            session.merge(existingOrder);
+            tx.commit();
             return true;
         } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
+            if (tx != null) tx.rollback();
             e.printStackTrace();
             return false;
-        } finally {
-            session.close();
+        }
+    }
+
+    @Override
+    public boolean delete(String id) {
+        Transaction tx = null;
+        try (Session session = HibernateUtil.getSession()) {
+            if (session == null) return false;
+            tx = session.beginTransaction();
+            OrderEntity order = session.get(OrderEntity.class, id);
+            if (order != null) {
+                if (order.getOrderDetails() != null) {
+                    for (OrderDetailsEntity detail : order.getOrderDetails()) {
+                        ProductEntity product = session.get(ProductEntity.class, detail.getProId());
+                        if (product != null) {
+                            product.setStockQty(product.getStockQty() + detail.getProQty());
+                            session.merge(product);
+                        }
+                    }
+                }
+                session.remove(order);
+                tx.commit();
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            return false;
+        }
+    }
+
+    @Override
+    public OrderEntity searchById(String id) {
+        try (Session session = HibernateUtil.getSession()) {
+            if (session == null) return null;
+            OrderEntity order = session.get(OrderEntity.class, id);
+            if (order != null && order.getOrderDetails() != null) {
+                order.getOrderDetails().size(); // force initialize
+            }
+            return order;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @Override
+    public ObservableList<OrderEntity> getAll() {
+        ObservableList<OrderEntity> list = FXCollections.observableArrayList();
+        try (Session session = HibernateUtil.getSession()) {
+            if (session == null) return list;
+            List<OrderEntity> results = session.createQuery("FROM OrderEntity ORDER BY ordDate DESC, ordTime DESC", OrderEntity.class).list();
+            for (OrderEntity o : results) {
+                if (o.getOrderDetails() != null) o.getOrderDetails().size();
+            }
+            list.addAll(results);
+            return list;
+        } catch (Exception e) {
+            return list;
         }
     }
 
     @Override
     public boolean save(OrderEntity orderEntity) {
-        try {
-            Session session = HibernateUtil.getSession();
-            session.beginTransaction();
-            session.persist(orderEntity);
-            session.getTransaction().commit();
-            session.close();
-            return true;
-        } catch (HibernateException e) {
-            e.printStackTrace();
-            return false;
-        }
+        return false;
     }
 
     @Override
@@ -157,62 +185,99 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public boolean delete(String id) {
-        Session session = HibernateUtil.getSession();
-        Transaction transaction = null;
-        try {
-            transaction = session.beginTransaction();
-            OrderEntity orderEntity = session.get(OrderEntity.class, id);
-
-            if (orderEntity == null) {
-                return false;
+    public ObservableList<OrderEntity> getOrdersByDate(LocalDate date) {
+        ObservableList<OrderEntity> list = FXCollections.observableArrayList();
+        try (Session session = HibernateUtil.getSession()) {
+            if (session == null) return list;
+            List<OrderEntity> results = session.createQuery("FROM OrderEntity WHERE ordDate = :date ORDER BY ordTime DESC", OrderEntity.class)
+                    .setParameter("date", date)
+                    .list();
+            for (OrderEntity o : results) {
+                if (o.getOrderDetails() != null) o.getOrderDetails().size();
             }
-
-            List<OrderDetailsEntity> orderDetails = orderEntity.getOrderDetails();
-            for (OrderDetailsEntity detail : orderDetails) {
-                ProductEntity product = session.get(ProductEntity.class, detail.getProId());
-                if (product != null) {
-                    product.setStockQty(product.getStockQty() + detail.getProQty());
-                    session.merge(product);
-                }
-            }
-
-            session.remove(orderEntity);
-            transaction.commit();
-            return true;
+            list.addAll(results);
+            return list;
         } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-            return false;
-        } finally {
-            session.close();
+            return list;
         }
     }
 
     @Override
-    public OrderEntity searchById(String id) {
-        try {
-            Session session = HibernateUtil.getSession();
-            return session.get(OrderEntity.class, id);
-        } catch (HibernateException e) {
-            System.out.println(e.getMessage());
-            return null;
+    public ObservableList<OrderEntity> getOrdersByMonth(int month, int year) {
+        ObservableList<OrderEntity> list = FXCollections.observableArrayList();
+        try (Session session = HibernateUtil.getSession()) {
+            if (session == null) return list;
+            List<OrderEntity> results = session.createQuery("FROM OrderEntity WHERE MONTH(ordDate) = :m AND YEAR(ordDate) = :y ORDER BY ordDate DESC", OrderEntity.class)
+                    .setParameter("m", month)
+                    .setParameter("y", year)
+                    .list();
+            for (OrderEntity o : results) {
+                if (o.getOrderDetails() != null) o.getOrderDetails().size();
+            }
+            list.addAll(results);
+            return list;
+        } catch (Exception e) {
+            return list;
         }
     }
 
     @Override
-    public ObservableList<OrderEntity> getAll() {
-        ObservableList<OrderEntity> orderList = FXCollections.observableArrayList();
-        try {
-            Session session = HibernateUtil.getSession();
-            List<OrderEntity> orderEntityList = session.createQuery("From OrderEntity", OrderEntity.class).list();
-            orderList.addAll(orderEntityList);
-            return orderList;
+    public ObservableList<OrderEntity> getOrdersByYear(int year) {
+        ObservableList<OrderEntity> list = FXCollections.observableArrayList();
+        try (Session session = HibernateUtil.getSession()) {
+            if (session == null) return list;
+            List<OrderEntity> results = session.createQuery("FROM OrderEntity WHERE YEAR(ordDate) = :y ORDER BY ordDate DESC", OrderEntity.class)
+                    .setParameter("y", year)
+                    .list();
+            for (OrderEntity o : results) {
+                if (o.getOrderDetails() != null) o.getOrderDetails().size();
+            }
+            list.addAll(results);
+            return list;
         } catch (Exception e) {
-            e.printStackTrace();
-            return orderList;
+            return list;
+        }
+    }
+
+    @Override
+    public Long getMonthlySalesCount(int month, int year) {
+        try (Session session = HibernateUtil.getSession()) {
+            if (session == null) return 0L;
+            Long count = session.createQuery("SELECT COUNT(o) FROM OrderEntity o WHERE MONTH(o.ordDate) = :m AND YEAR(o.ordDate) = :y", Long.class)
+                    .setParameter("m", month)
+                    .setParameter("y", year)
+                    .uniqueResult();
+            return count != null ? count : 0L;
+        } catch (Exception e) {
+            return 0L;
+        }
+    }
+
+    @Override
+    public Double getMonthlySalesTotal(int month, int year) {
+        try (Session session = HibernateUtil.getSession()) {
+            if (session == null) return 0.0;
+            Double total = session.createQuery("SELECT SUM(o.ordTotal) FROM OrderEntity o WHERE MONTH(o.ordDate) = :m AND YEAR(o.ordDate) = :y", Double.class)
+                    .setParameter("m", month)
+                    .setParameter("y", year)
+                    .uniqueResult();
+            return total != null ? total : 0.0;
+        } catch (Exception e) {
+            return 0.0;
+        }
+    }
+
+    @Override
+    public Long getMonthlyItemsSoldCount(int month, int year) {
+        try (Session session = HibernateUtil.getSession()) {
+            if (session == null) return 0L;
+            Long count = session.createQuery("SELECT SUM(d.proQty) FROM OrderDetailsEntity d WHERE MONTH(d.order.ordDate) = :m AND YEAR(d.order.ordDate) = :y", Long.class)
+                    .setParameter("m", month)
+                    .setParameter("y", year)
+                    .uniqueResult();
+            return count != null ? count : 0L;
+        } catch (Exception e) {
+            return 0L;
         }
     }
 }
