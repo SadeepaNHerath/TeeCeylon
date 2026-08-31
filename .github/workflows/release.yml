@@ -1,0 +1,177 @@
+name: Build Multi-Platform Native Installers
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. 1.0.0)'
+        required: false
+        default: '1.0.0'
+
+permissions:
+  contents: write
+
+jobs:
+  build-installers:
+    name: Build Installer (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: windows
+            artifact-pattern: dist/*.exe
+          - os: macos-latest
+            platform: macos
+            artifact-pattern: dist/*.dmg
+          - os: ubuntu-latest
+            platform: linux
+            artifact-pattern: dist/*.deb
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Install Linux Dependencies (for .deb packaging)
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fakeroot binutils
+
+      - name: Build Fat JAR with Maven
+        run: mvn clean package -DskipTests
+
+      - name: Determine Version
+        id: get_version
+        shell: bash
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          elif [[ -n "${{ github.event.inputs.version }}" ]]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="1.0.0"
+          fi
+          # Ensure semver format X.Y.Z for jpackage
+          if [[ ! "$VERSION" =~ ^[0-9]+(\.[0-9]+)*$ ]]; then
+            VERSION="1.0.0"
+          fi
+          echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "Building version: $VERSION"
+
+      # Windows .exe packaging
+      - name: Package Windows Installer (.exe)
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: |
+          mkdir dist
+          jpackage --type exe `
+                   --name "TeeCeylon" `
+                   --app-version "$env:APP_VERSION" `
+                   --vendor "TeeCeylon" `
+                   --description "TeeCeylon T-Shirt Shop POS & Inventory Management System" `
+                   --input "target" `
+                   --main-jar "Tee-CeylonStoreManagement-1.0-SNAPSHOT.jar" `
+                   --main-class "org.example.AppLauncher" `
+                   --win-dir-chooser `
+                   --win-shortcut `
+                   --win-menu `
+                   --win-menu-group "TeeCeylon" `
+                   --dest "dist"
+
+      # macOS .dmg packaging
+      - name: Package macOS Installer (.dmg)
+        if: matrix.platform == 'macos'
+        shell: bash
+        run: |
+          mkdir dist
+          jpackage --type dmg \
+                   --name "TeeCeylon" \
+                   --app-version "$APP_VERSION" \
+                   --vendor "TeeCeylon" \
+                   --description "TeeCeylon T-Shirt Shop POS & Inventory Management System" \
+                   --mac-package-identifier "org.example.teeceylon" \
+                   --mac-package-name "TeeCeylon" \
+                   --input "target" \
+                   --main-jar "Tee-CeylonStoreManagement-1.0-SNAPSHOT.jar" \
+                   --main-class "org.example.AppLauncher" \
+                   --dest "dist"
+
+      # Linux .deb packaging
+      - name: Package Linux Installer (.deb)
+        if: matrix.platform == 'linux'
+        shell: bash
+        run: |
+          mkdir dist
+          jpackage --type deb \
+                   --name "teeceylon" \
+                   --app-version "$APP_VERSION" \
+                   --vendor "TeeCeylon" \
+                   --description "TeeCeylon T-Shirt Shop POS & Inventory Management System" \
+                   --linux-shortcut \
+                   --linux-menu-group "Office;Finance;" \
+                   --input "target" \
+                   --main-jar "Tee-CeylonStoreManagement-1.0-SNAPSHOT.jar" \
+                   --main-class "org.example.AppLauncher" \
+                   --dest "dist"
+
+      - name: Upload Installer Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer-${{ matrix.platform }}
+          path: ${{ matrix.artifact-pattern }}
+          if-no-files-found: error
+
+  publish-release:
+    name: Publish Multi-Platform Release
+    needs: build-installers
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download All Installer Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: Display Downloaded Files
+        run: ls -lh release-assets/
+
+      - name: Determine Release Tag
+        id: release_tag
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            TAG_NAME="${GITHUB_REF_NAME}"
+          elif [[ -n "${{ github.event.inputs.version }}" ]]; then
+            TAG_NAME="v${{ github.event.inputs.version }}"
+          else
+            TAG_NAME="v1.0.0"
+          fi
+          echo "TAG_NAME=$TAG_NAME" >> "$GITHUB_ENV"
+
+      - name: Create GitHub Release with All Installers
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG_NAME }}
+          name: Release ${{ env.TAG_NAME }}
+          draft: false
+          prerelease: false
+          files: release-assets/*
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
