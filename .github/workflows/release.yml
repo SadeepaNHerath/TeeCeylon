@@ -49,6 +49,26 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y fakeroot binutils
 
+      # Inject optional Aiven / Cloud DB secrets if configured in GitHub Repository Secrets
+      - name: Configure Cloud DB Parameters
+        shell: bash
+        env:
+          SECRET_DB_URL: ${{ secrets.DB_URL || secrets.AIVEN_MYSQL_URL }}
+          SECRET_DB_USER: ${{ secrets.DB_USER || secrets.AIVEN_MYSQL_USER }}
+          SECRET_DB_PASSWORD: ${{ secrets.DB_PASSWORD || secrets.AIVEN_MYSQL_PASSWORD }}
+        run: |
+          PROPS_FILE="src/main/resources/application.properties"
+          if [[ -n "$SECRET_DB_URL" ]]; then
+            echo "Injecting configured cloud DB_URL into application.properties"
+            sed -i.bak "s|^db.url=.*|db.url=${SECRET_DB_URL}|" "$PROPS_FILE"
+          fi
+          if [[ -n "$SECRET_DB_USER" ]]; then
+            sed -i.bak "s|^db.user=.*|db.user=${SECRET_DB_USER}|" "$PROPS_FILE"
+          fi
+          if [[ -n "$SECRET_DB_PASSWORD" ]]; then
+            sed -i.bak "s|^db.password=.*|db.password=${SECRET_DB_PASSWORD}|" "$PROPS_FILE"
+          fi
+
       - name: Build Fat JAR with Maven
         run: mvn clean package -DskipTests
 
